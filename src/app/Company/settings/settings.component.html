@@ -1,0 +1,71 @@
+<div class="min-h-screen bg-[#f8fafc] py-10 px-4 sm:px-6 lg:px-8 font-sans">
+  <div class="max-w-4xl mx-auto space-y-6">
+    
+    <!-- PAGE HEADER -->
+    <div class="flex items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Edit Job Posts</h1>
+        <p class="text-sm text-gray-500 mt-2">
+          You have posted a total of <span class="font-bold text-[#5046e5] px-1">{{ totalJobsPosted }}</span> jobs.
+        </p>
+      </div>
+      <a routerLink="/" class="text-sm font-medium text-[#5046e5] hover:text-[#4338ca] transition-colors bg-gray-50 px-5 py-2.5 rounded-lg border border-gray-200 shadow-sm">
+        ← Back to Home
+      </a>
+    </div>
+
+    <!-- MANAGE JOBS SECTION -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      
+      <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+        <h2 class="text-lg font-bold text-gray-900">Your Job Listings</h2>
+        <!-- UPDATED: Now passes queryParams to return to the settings page -->
+        <a routerLink="/company/post-job" [queryParams]="{ returnUrl: '/company/settings' }" class="text-sm font-medium text-white bg-[#5046e5] hover:bg-[#4338ca] transition-colors px-4 py-2 rounded-lg shadow-sm">
+          + Post New Job
+        </a>
+      </div>
+
+      <!-- Job List -->
+      <div class="divide-y divide-gray-100">
+        @for (job of myJobs; track job.id) {
+          <div class="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-gray-50 transition-colors">
+            
+            <!-- Job Info -->
+            <div class="mb-4 sm:mb-0">
+              <div class="flex items-center gap-3 mb-1">
+                <h3 class="font-bold text-gray-900 text-lg">{{ job.title }}</h3>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" 
+                      [ngClass]="job.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                  {{ job.status }}
+                </span>
+              </div>
+              <div class="text-sm text-gray-500 flex items-center gap-3">
+                <span>{{ job.type }}</span>
+                <span>•</span>
+                <span>Posted {{ job.posted }}</span>
+              </div>
+            </div>
+
+            <!-- Edit Action -->
+            <button (click)="editJob(job.id)" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-[#5046e5] transition-colors shadow-sm flex items-center gap-2">
+              <span>✏️</span> Edit Post
+            </button>
+
+          </div>
+        }
+      </div>
+
+      <!-- Empty State -->
+      @if (myJobs.length === 0) {
+        <div class="p-12 text-center">
+          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl text-gray-400">📄</div>
+          <h3 class="text-lg font-bold text-gray-900 mb-1">No jobs posted yet</h3>
+          <p class="text-gray-500 text-sm mb-4">Create your first job listing to see it here.</p>
+          <a routerLink="/company/post-job" class="text-sm font-medium text-[#5046e5] hover:underline">Post a job now</a>
+        </div>
+      }
+
+    </div>
+
+  </div>
+</div>
