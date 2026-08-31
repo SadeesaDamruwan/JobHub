@@ -6,7 +6,9 @@
       <h1 class="text-2xl font-bold text-gray-900">Manage Applicants</h1>
       <p class="text-sm text-gray-500 mt-1">Review and manage candidates for your active job postings.</p>
     </div>
-    <a href="/" class="text-sm font-medium text-[#5046e5] hover:underline">← Back to Dashboard</a>
+    <a routerLink="/" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-xl shadow-sm transition hover:text-[#5046e5]">
+      ← Back to Dashboard
+    </a>
   </header>
 
   <!-- Main Layout -->
@@ -16,35 +18,46 @@
     <div class="w-1/3 border-r border-gray-200 bg-white overflow-y-auto">
       
       <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-        <span class="text-xs font-bold tracking-wider text-gray-500 uppercase">Total Applicants ({{ applicants.length }})</span>
+        <span class="text-xs font-bold tracking-wider text-gray-500 uppercase">Total Applicants {{ isLoading ? '(Loading...)' : '(' + applicants.length + ')' }}</span>
       </div>
 
-      <div class="divide-y divide-gray-100">
-        @for (applicant of applicants; track applicant.id) {
-          <div 
-            class="p-5 cursor-pointer transition-colors hover:bg-gray-50"
-            [class.bg-[#f5f7ff]]="selectedApplicant?.id === applicant.id"
-            [class.border-l-4]="selectedApplicant?.id === applicant.id"
-            [class.border-[#5046e5]]="selectedApplicant?.id === applicant.id"
-            (click)="selectApplicant(applicant)"
-          >
-            <div class="flex justify-between items-start mb-1">
-              <h3 class="text-sm font-bold text-gray-900">{{ applicant.name }}</h3>
-              <span class="text-xs text-gray-400">{{ applicant.appliedDate }}</span>
+      @if (isLoading) {
+        <div class="p-8 text-center text-[#5046e5]">
+          <p class="text-xs font-bold uppercase tracking-widest">LOADING APPLICANTS....</p>
+        </div>
+      } @else if (applicants.length === 0) {
+        <div class="p-8 text-center text-gray-400">
+          <p class="text-sm font-semibold text-gray-700 mb-1">No Applicants</p>
+          <p class="text-xs text-gray-500">No candidates have applied to your postings yet.</p>
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-100">
+          @for (applicant of applicants; track applicant.id) {
+            <div 
+              class="p-5 cursor-pointer transition-colors hover:bg-gray-50"
+              [class.bg-[#f5f7ff]]="selectedApplicant?.id === applicant.id"
+              [class.border-l-4]="selectedApplicant?.id === applicant.id"
+              [class.border-[#5046e5]]="selectedApplicant?.id === applicant.id"
+              (click)="selectApplicant(applicant)"
+            >
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-sm font-bold text-gray-900">{{ applicant.name }}</h3>
+                <span class="text-xs text-gray-400">{{ applicant.appliedDate }}</span>
+              </div>
+              <p class="text-xs font-medium text-[#5046e5] mb-2">{{ applicant.roleApplied }}</p>
+              
+              <div class="flex items-center gap-2">
+                <span 
+                  class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+                  [ngClass]="applicant.status === 'New' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                >
+                  {{ applicant.status }}
+                </span>
+              </div>
             </div>
-            <p class="text-xs font-medium text-[#5046e5] mb-2">{{ applicant.roleApplied }}</p>
-            
-            <div class="flex items-center gap-2">
-              <span 
-                class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-                [ngClass]="applicant.status === 'New' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
-              >
-                {{ applicant.status }}
-              </span>
-            </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      }
     </div>
 
     <!-- Right Side: Applicant Details -->
@@ -69,12 +82,12 @@
             
             <!-- Actions -->
             <div class="flex flex-col gap-2">
-              <button class="bg-[#5046e5] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#4338ca] transition">
-                Download Resume
+              <button (click)="downloadResume(selectedApplicant)" class="bg-[#5046e5] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#4338ca] transition">
+                📄 Download Resume
               </button>
-              <button class="border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">
-                Send Email
-              </button>
+              <a [href]="'mailto:' + selectedApplicant.email" class="border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-gray-50 transition text-center">
+                ✉️ Send Email
+              </a>
             </div>
           </div>
 
@@ -97,14 +110,73 @@
             </div>
           </div>
 
-          <!-- Application Status Buttons -->
-          <div class="mt-10 flex gap-3 pt-6 border-t border-gray-100">
-            <button class="bg-green-600 text-white font-medium px-6 py-2.5 rounded-lg hover:bg-green-700 transition">
-              Accept Candidate
-            </button>
-            <button class="bg-red-50 text-red-600 font-medium px-6 py-2.5 rounded-lg hover:bg-red-100 transition">
-              Reject
-            </button>
+          <!-- Application Decision & Action Area -->
+          <div class="mt-8 pt-6 border-t border-gray-100">
+            
+            <!-- Success Alert Banner -->
+            <div *ngIf="statusSuccessMessage" class="mb-4 p-3.5 bg-green-50 border border-green-200 text-green-800 text-sm font-semibold rounded-xl flex items-center gap-2">
+              <span>✅</span> {{ statusSuccessMessage }}
+            </div>
+
+            <!-- VIEW 1: DECIDED STATE (Buttons are gone, shows sent decision and note) -->
+            <div *ngIf="selectedApplicant.status !== 'New' && selectedApplicant.status !== 'Under Review' && !isEditingDecision"
+                 class="p-5 rounded-xl border"
+                 [ngClass]="{
+                   'bg-green-50 border-green-200': selectedApplicant.status === 'Accepted',
+                   'bg-indigo-50 border-indigo-200': selectedApplicant.status === 'Interview',
+                   'bg-red-50 border-red-200': selectedApplicant.status === 'Rejected'
+                 }">
+              
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2 font-bold text-sm"
+                     [ngClass]="{
+                       'text-green-800': selectedApplicant.status === 'Accepted',
+                       'text-indigo-800': selectedApplicant.status === 'Interview',
+                       'text-red-800': selectedApplicant.status === 'Rejected'
+                     }">
+                  <span *ngIf="selectedApplicant.status === 'Accepted'">🎉 Candidate Accepted & Offer Sent</span>
+                  <span *ngIf="selectedApplicant.status === 'Interview'">📅 Candidate Invited to Interview</span>
+                  <span *ngIf="selectedApplicant.status === 'Rejected'">❌ Application Rejected</span>
+                </div>
+                <button (click)="toggleEditDecision()" class="text-xs font-semibold underline text-gray-600 hover:text-gray-900 cursor-pointer">
+                  ✏️ Update Decision / Note
+                </button>
+              </div>
+
+              <div class="text-xs text-gray-600 uppercase font-bold mb-1">Message Sent to Candidate:</div>
+              <div class="text-sm bg-white p-3.5 rounded-lg border border-gray-200 text-gray-800 whitespace-pre-wrap">
+                {{ selectedApplicant.employerFeedback || (selectedApplicant.status === 'Accepted' ? 'Congratulations! Your application has been accepted.' : (selectedApplicant.status === 'Interview' ? 'You have been invited to an interview. Check back soon for scheduling.' : 'Thank you for your application. We have decided to proceed with other candidates.')) }}
+              </div>
+            </div>
+
+            <!-- VIEW 2: ACTIVE DECISION FORM (When pending or employer clicks update) -->
+            <div *ngIf="selectedApplicant.status === 'New' || selectedApplicant.status === 'Under Review' || isEditingDecision">
+              <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">
+                Candidate Note / Offer Details / Reason (Visible to Candidate):
+              </label>
+              <textarea 
+                [(ngModel)]="decisionNote" 
+                rows="3" 
+                placeholder="Type offer details, interview link/dates, or reason/feedback for candidate..." 
+                class="w-full p-3.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5046e5] outline-none bg-gray-50 mb-4 transition focus:bg-white text-gray-800">
+              </textarea>
+
+              <div class="flex gap-3 items-center flex-wrap">
+                <button (click)="updateStatus('Accepted')" class="bg-green-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-700 transition flex items-center gap-2 shadow-sm cursor-pointer">
+                  ✅ Accept Candidate
+                </button>
+                <button (click)="updateStatus('Interview')" class="bg-[#5046e5] text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm cursor-pointer">
+                  📅 Invite to Interview
+                </button>
+                <button (click)="updateStatus('Rejected')" class="bg-white text-red-600 border border-red-200 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-red-50 transition flex items-center gap-2 cursor-pointer">
+                  ❌ Reject
+                </button>
+                <button *ngIf="isEditingDecision" (click)="toggleEditDecision()" class="text-gray-500 hover:text-gray-700 text-sm font-medium ml-auto cursor-pointer">
+                  Cancel
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
