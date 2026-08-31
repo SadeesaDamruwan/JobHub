@@ -1,94 +1,105 @@
 <div class="page-wrapper">
-  
   <main class="main-content">
+
+    <!-- LOADING STATE -->
+    @if (isLoading) {
+    <div class="state-container">
+      <p>Loading your profile...</p>
+    </div>
+    }
+
+    <!-- ERROR STATE -->
+    @else if (errorMessage) {
+    <div class="state-container error-state">
+      <h2>Profile Incomplete</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="submit-btn" (click)="goToEditProfile()">Complete Profile Now</button>
+    </div>
+    }
+
+    <!-- SUCCESS VIEW -->
+    @else if (profileData) {
     <div class="profile-card">
-      
-      <!-- UPDATED HEADER SECTION -->
-      <div class="header-section">
-        <span class="badge">STEP 2: ACCOUNT SETUP</span>
-        <h2>Complete Your Profile</h2>
-        <p>Add your personal information, career details, and skills to start applying for jobs.</p>
+
+      <!-- Top Navigation Bar -->
+      <div class="profile-top-bar">
+        <a routerLink="/" class="btn-back-home">← Back to Home</a>
+        <button class="btn-edit" (click)="goToEditProfile()">✏️ Edit Profile</button>
       </div>
 
-      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-        <!-- Avatar Upload -->
-        <div class="avatar-upload-container">
-          <div class="avatar-preview">
-            @if (avatarPreview) {
-              <img [src]="avatarPreview" alt="Profile Avatar" />
-            } @else {
-              <span class="avatar-placeholder">AVATAR</span>
-            }
-          </div>
-          <div class="avatar-details">
-            <label class="upload-btn">
-              <input type="file" (change)="onAvatarChange($event)" accept="image/png, image/jpeg" hidden />
-              <span>📁 Upload photo</span>
-            </label>
-            <span class="hint-text">PNG or JPG, square image recommended</span>
-          </div>
+      <!-- Centered Header -->
+      <div class="profile-header">
+        <div class="avatar-display">
+          {{ (profileData.fullName?.charAt(0) || 'U') | uppercase }}
         </div>
+        <h2 class="profile-name">{{ profileData.fullName || 'Job Seeker' }}</h2>
+        <p class="profile-title">{{ profileData.jobTitle || 'Job Seeker' }}</p>
+        <p class="profile-location">📍 {{ profileData.location || 'Location not specified' }}</p>
+      </div>
 
-        <!-- Form Fields Grid -->
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" formControlName="fullName" placeholder="e.g. John Doe" />
+      <!-- Body Grid -->
+      <div class="info-grid">
+
+        <!-- Left Column -->
+        <div class="main-column">
+          <div class="info-section">
+            <h3>Professional Summary</h3>
+            <p class="info-text">{{ profileData.bio || 'No summary provided yet.' }}</p>
           </div>
 
-          <div class="form-group">
-            <label>Professional Title</label>
-            <input type="text" formControlName="jobTitle" placeholder="e.g. Software Engineer" />
-          </div>
-
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" formControlName="email" placeholder="john.doe@example.com" />
-          </div>
-
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" formControlName="phone" placeholder="+94 74 138 1405" />
-          </div>
-
-          <div class="form-group full-width">
-            <label>Location / City</label>
-            <input type="text" formControlName="location" placeholder="e.g. Colombo, Sri Lanka" />
-          </div>
-
-          <div class="form-group full-width">
-            <label>Professional Bio / Summary</label>
-            <textarea rows="4" formControlName="bio" placeholder="Briefly describe your experience, background, and career goals..."></textarea>
-          </div>
-
-          <div class="form-group full-width">
-            <label>Key Skills (comma separated)</label>
-            <input type="text" formControlName="skills" placeholder="e.g. Angular, TypeScript, UI/UX, Python" />
-          </div>
-
-          <div class="form-group full-width">
-            <label>Resume / CV</label>
-            <div class="resume-box">
-              <label class="btn-file-upload">
-                <input type="file" (change)="onResumeChange($event)" accept=".pdf,.doc,.docx" hidden />
-                <span>📄 Choose Resume File</span>
-              </label>
-              <span class="file-name">{{ resumeFileName || 'No file chosen (PDF, DOCX up to 5MB)' }}</span>
+          <div class="info-section">
+            <h3>Key Skills</h3>
+            <div class="skills-container">
+              @if (skillsArray.length > 0) {
+              @for (skill of skillsArray; track skill) {
+              <span class="skill-bubble">{{ skill }}</span>
+              }
+              } @else {
+              <p class="info-text">No skills added yet.</p>
+              }
             </div>
           </div>
         </div>
 
-        <!-- UPDATED SUBMIT BUTTON TEXT -->
-        <button type="submit" class="submit-btn" [disabled]="profileForm.invalid">
-          Complete Registration
-        </button>
+        <!-- Right Column -->
+        <div class="side-column">
 
-        @if (isSaved) {
-          <div class="success-banner">
-            ✓ Profile completed! Taking you to your dashboard...
+          <!-- Resume / CV Card -->
+          <div class="resume-card">
+            <h3>Resume / CV</h3>
+            <div class="resume-info">
+              <span class="resume-icon">📄</span>
+              <span class="resume-name">{{ resumeFileName || 'Profile_Resume.pdf' }}</span>
+            </div>
+            <button (click)="downloadCV()" class="btn-download-cv">
+              ⬇️ Download CV
+            </button>
           </div>
-        }
-      </form>
+
+          <div class="contact-box mt-6">
+            <h3>Contact Details</h3>
+
+            <div class="contact-item">
+              <span class="contact-icon">📧</span>
+              <div class="contact-text">
+                <span class="contact-label">Email Address</span>
+                <span class="contact-value">{{ profileData.email }}</span>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <span class="contact-icon">📱</span>
+              <div class="contact-text">
+                <span class="contact-label">Phone Number</span>
+                <span class="contact-value">{{ profileData.phone || 'Not provided' }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
+    }
   </main>
 </div>

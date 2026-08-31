@@ -1,65 +1,102 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router'; // <-- Added Router
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-job-seeker-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule], 
+  imports: [CommonModule, RouterModule],
   templateUrl: './job-seeker-profile.component.html',
   styleUrl: './job-seeker-profile.component.css'
 })
 export class JobSeekerProfileComponent implements OnInit {
-  profileForm!: FormGroup;
-  avatarPreview: string | ArrayBuffer | null = null;
-  resumeFileName = '';
-  isSaved = false;
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
 
-  // Added Router to the constructor
-  constructor(private fb: FormBuilder, private router: Router) {}
+  profileData: any = null;
+  skillsArray: string[] = [];
+  isLoading: boolean = true;
+  errorMessage: string = '';
+  resumeFileName: string = '';
+  resumeData: string = '';
 
-  ngOnInit() {
-    this.profileForm = this.fb.group({
-      fullName: ['Sadeesa Damruwan', Validators.required],
-      jobTitle: ['Software Engineer', Validators.required],
-      email: ['contact@example.com', [Validators.required, Validators.email]],
-      phone: ['+94 7X XXX XXXX', Validators.required],
-      location: ['Sri Lanka', Validators.required],
-      bio: ['Software Engineering undergraduate at NSBM Green University. Passionate about mobile and web development.', Validators.required],
-      skills: ['Flutter, React, Node.js, Python, Java', Validators.required]
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const email = localStorage.getItem('seekerEmail');
+      
+      if (email) {
+        this.resumeFileName = localStorage.getItem(`seekerResumeName_${email}`) || '';
+        this.resumeData = localStorage.getItem(`seekerResumeData_${email}`) || '';
+        this.fetchProfileData(email);
+      } else {
+        this.errorMessage = 'No user email found. Please log in or register.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  fetchProfileData(email: string): void {
+    this.http.get(`http://localhost:3000/api/seeker/profile/${encodeURIComponent(email)}`).subscribe({
+      next: (response: any) => {
+        this.profileData = response.profile;
+        
+        if (this.profileData.skills) {
+          this.skillsArray = this.profileData.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
+        }
+
+        if (this.profileData.resumeFileName && !this.resumeFileName) {
+          this.resumeFileName = this.profileData.resumeFileName;
+        }
+        if (this.profileData.resumeData && !this.resumeData) {
+          this.resumeData = this.profileData.resumeData;
+        }
+
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching profile:', err);
+        this.errorMessage = 'Could not load profile data. Have you completed your profile setup yet?';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  onAvatarChange(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.avatarPreview = e.target?.result || null;
-      reader.readAsDataURL(file);
-    }
+  goToEditProfile(): void {
+    this.router.navigate(['/job-seeker/complete-profile']);
   }
 
-  onResumeChange(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.resumeFileName = file.name;
-    }
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 
-  onSubmit() {
-    if (this.profileForm.valid) {
-      console.log('Saved Profile Data:', this.profileForm.value);
-      
-      this.isSaved = true;
-      
-      // Redirect to the Job Seeker Dashboard after 1.5 seconds!
-      setTimeout(() => {
-        this.router.navigate(['/job-seeker/jobs']);
-      }, 1500);
+  downloadCV(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
 
+    if (this.resumeData && this.resumeData.startsWith('data:')) {
+      const link = document.createElement('a');
+      link.href = this.resumeData;
+      link.download = this.resumeFileName || `${this.profileData?.fullName?.replace(/\s+/g, '_') || 'My'}_Resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } else {
-      this.profileForm.markAllAsTouched();
+      const name = this.profileData?.fullName || 'Candidate';
+      const content = `CANDIDATE PROFILE & RESUME\n--------------------------\nFull Name: ${name}\nTitle: ${this.profileData?.jobTitle || 'Job Seeker'}\nEmail: ${this.profileData?.email}\nPhone: ${this.profileData?.phone || 'Not specified'}\nLocation: ${this.profileData?.location || 'Not specified'}\n\nSummary:\n${this.profileData?.bio || 'N/A'}\n\nSkills:\n${this.profileData?.skills || 'N/A'}\n`;
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${name.replace(/\s+/g, '_')}_Resume.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     }
   }
 }
