@@ -1,0 +1,227 @@
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar__inner relative w-full flex items-center justify-between">
+    
+    <div class="logo z-10">Job<span class="logo__accent">Hub</span>.lk</div>
+
+    <nav class="nav-links absolute left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-10">
+      <a href="#" class="nav-links__item nav-links__item--active">Home</a>
+      
+      <!-- Job Dropdown -->
+      <div class="relative">
+        <a (click)="toggleJobMenu()" class="nav-links__item cursor-pointer select-none flex items-center gap-1">
+          Job <span class="text-[10px] opacity-70">▼</span>
+        </a>
+        @if (isJobDropdownOpen) {
+          <div class="absolute left-0 mt-4 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 overflow-hidden">
+            <a (click)="filterJobs('cv')" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+              CV Required
+            </a>
+            <a (click)="filterJobs('non-cv')" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+              Non-CV Jobs
+            </a>
+            <div class="h-px bg-gray-100 my-1"></div>
+            <a (click)="filterJobs('walk-in')" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+              Walk-in Interviews
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Company Link -->
+      <a (click)="viewActiveCompanies()" class="nav-links__item cursor-pointer select-none">
+        Company
+      </a>
+    </nav>
+
+    <div class="navbar__actions z-10">
+      
+      <!-- STATE 1: COMPANY LOGGED IN -->
+      @if (isCompanyLoggedIn) {
+        <div class="flex items-center gap-4">
+          
+          <button (click)="goToPostJob()" class="btn btn--accent" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            + Post Job
+          </button>
+
+          <div class="relative">
+            <!-- Company Profile Icon -->
+            <div class="profile-menu flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white/10 transition select-none" (click)="toggleDropdown()">
+               <div class="w-9 h-9 bg-[#f5a623] text-[#1a1f2e] rounded-full flex items-center justify-center font-bold text-sm">SD</div>
+               <span class="text-white font-semibold text-sm">Sadeesa Damruwan</span>
+               <span class="text-white text-[10px] ml-1 opacity-70">▼</span>
+            </div>
+
+            <!-- Company Dropdown -->
+            @if (isDropdownOpen) {
+              <div class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 overflow-hidden">
+                <a (click)="goToEditCompanyProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+                  <span>🏢</span> Edit Company Details
+                </a>
+                <div class="h-px bg-gray-100 my-1"></div>
+                <a (click)="goToEditPost()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+                  <span>✏️</span> Edit Post
+                </a>
+                <a (click)="goToPostStatus()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#5046e5] cursor-pointer transition">
+                  <span>📊</span> Post Status
+                </a>
+                <div class="h-px bg-gray-100 my-1"></div>
+                <a (click)="logout()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer transition">
+                  <span>🚪</span> Log out
+                </a>
+              </div>
+            }
+          </div>
+        </div>
+      } 
+      
+      <!-- STATE 2: JOB SEEKER LOGGED IN -->
+      @else if (isSeekerLoggedIn) {
+        <div class="flex items-center">
+          <div class="relative">
+            <!-- Job Seeker Profile Icon -->
+            <div class="profile-menu flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white/10 transition select-none" (click)="toggleSeekerDropdown()">
+               <div class="w-9 h-9 bg-[#2563eb] text-white rounded-full flex items-center justify-center font-bold text-sm">SD</div>
+               <span class="text-white font-semibold text-sm">Sadeesa Damruwan</span>
+               <span class="text-white text-[10px] ml-1 opacity-70">▼</span>
+            </div>
+
+            <!-- Job Seeker Dropdown -->
+            @if (isSeekerDropdownOpen) {
+              <div class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 overflow-hidden">
+                <a (click)="goToSeekerProfile()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#2563eb] cursor-pointer transition">
+                  <span>👤</span> Edit Profile
+                </a>
+                <a (click)="goToSeekerJobs()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#f8fafc] hover:text-[#2563eb] cursor-pointer transition">
+                  <span>💼</span> Jobs
+                </a>
+                <div class="h-px bg-gray-100 my-1"></div>
+                <a (click)="logoutSeeker()" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer transition">
+                  <span>🚪</span> Log out
+                </a>
+              </div>
+            }
+          </div>
+        </div>
+      } 
+      
+      <!-- STATE 3: NOBODY LOGGED IN -->
+      @else {
+        <button class="btn btn--outline-light" (click)="startSeekerFlow()">Job Seeker</button>
+        <button class="btn btn--accent" (click)="startCompanyFlow()">Job Advertisement</button>
+      }
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__inner">
+    <p class="hero__eyebrow">Sri Lanka's Job Network</p>
+    <h1 class="hero__title">Find where your career starts.</h1>
+    <p class="hero__subtitle">Verified job listings from Sri Lankan companies — tech, finance, design and more. Apply in minutes, track every application in one place.</p>
+
+    <form class="search-bar" (ngSubmit)="onSearch()">
+      <div class="search-bar__field">
+        <span class="search-bar__icon">🔍</span>
+        <input type="text" placeholder="Role, skill or company — e.g. Data Analyst" [(ngModel)]="searchKeyword" name="searchKeyword" />
+      </div>
+      <div class="search-bar__divider"></div>
+      <div class="search-bar__field">
+        <span class="search-bar__icon">📍</span>
+        <input type="text" placeholder="Colombo, or Remote" [(ngModel)]="searchLocation" name="searchLocation" />
+      </div>
+      <button type="submit" class="btn btn--accent search-bar__submit">Search</button>
+    </form>
+
+    <div class="hero__stats">
+      <div class="stat"><div class="stat__number">{{ activeListings | number }}</div><div class="stat__label">active job listings</div></div>
+      <div class="stat"><div class="stat__number">{{ hiringCompanies }}</div><div class="stat__label">hiring companies</div></div>
+      <div class="stat"><div class="stat__number">{{ offerRate }}%</div><div class="stat__label">convert to full-time offers</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<section class="content">
+  <div class="content__inner">
+    <aside class="filters">
+      <h3 class="filters__title">Filter results</h3>
+      <div class="filter-group">
+        <p class="filter-group__label">Category</p>
+        <label class="checkbox-row" *ngFor="let cat of categories">
+          <input type="checkbox" [(ngModel)]="cat.checked" [name]="cat.name" />
+          <span class="dot" [style.backgroundColor]="cat.color"></span>
+          <span class="checkbox-row__text">{{ cat.name }}</span>
+          <span class="checkbox-row__count">{{ cat.count }}</span>
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <p class="filter-group__label">Location</p>
+        <select class="select-input">
+          <option>All locations</option><option>Colombo</option><option>Kandy</option><option>Remote</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <p class="filter-group__label">Work mode</p>
+        <div class="pill-row">
+          <button *ngFor="let mode of workModes" type="button" class="pill" [class.pill--active]="selectedWorkMode === mode" (click)="selectWorkMode(mode)">{{ mode }}</button>
+        </div>
+      </div>
+
+      <!-- Job Level Filter -->
+      <div class="filter-group">
+        <p class="filter-group__label">Job Level</p>
+        <label class="checkbox-row" *ngFor="let level of jobLevels">
+          <input type="checkbox" [(ngModel)]="level.checked" [name]="level.label" />
+          <span class="checkbox-row__text">{{ level.label }}</span>
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <p class="filter-group__label">Minimum stipend (LKR/mo)</p>
+        <input type="range" class="range-input" [min]="minStipend" [max]="maxStipend" [(ngModel)]="minStipend" name="minStipend" />
+        <div class="range-labels">
+          <span>Rs {{ minStipend | number }}</span><span>Rs {{ maxStipend | number }}+</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="job-list">
+      <div class="job-list__header">
+        <div>
+          <h2 class="job-list__title">412 jobs in Tech &amp; Engineering</h2>
+          <p class="job-list__subtitle">Showing verified postings, updated today</p>
+        </div>
+        <div class="sort-by">
+          <span>Sort by</span>
+          <select [(ngModel)]="sortBy" name="sortBy">
+            <option>Deadline: soonest</option><option>Stipend: highest</option><option>Newest posted</option>
+          </select>
+        </div>
+      </div>
+
+      <article class="job-card" *ngFor="let job of jobs" [style.borderLeftColor]="job.barColor">
+        <div class="job-card__avatar" [style.backgroundColor]="job.avatarColor">{{ job.initials }}</div>
+        <div class="job-card__body">
+          <h3 class="job-card__title">{{ job.title }}</h3>
+          <p class="job-card__company">{{ job.company }}</p>
+          <p class="job-card__meta">
+            <span>💼 {{ job.level }}</span><span>👤 {{ job.workMode }}</span><span class="job-card__stipend">{{ job.stipend }}</span>
+          </p>
+          <div class="job-card__actions">
+            <button class="btn btn--accent-blue">Apply now</button><button class="btn btn--outline">Save</button>
+          </div>
+        </div>
+        <div class="job-card__side">
+          <span class="tag" [style.color]="job.tagColor" [style.backgroundColor]="job.tagBg">{{ job.categoryTag }}</span>
+          <div class="days-left" [style.color]="job.barColor">
+            <span class="days-left__number">{{ job.daysLeft }}</span><span class="days-left__label">days left</span>
+          </div>
+        </div>
+      </article>
+    </main>
+  </div>
+</section>
