@@ -1,0 +1,205 @@
+.page-wrapper {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 4rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+.main-content {
+  width: 100%;
+  max-width: 850px;
+}
+.profile-card {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+  border: 1px solid #f3f4f6;
+}
+.header-section {
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1.5rem;
+}
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.btn-back {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.btn-back:hover {
+  background: #ede9fe;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+.badge {
+  background: #e0e7ff;
+  color: #4f46e5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+.header-section h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0.75rem 0 0.25rem 0;
+}
+.header-section p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+.avatar-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+}
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-placeholder {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 1px;
+}
+.upload-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.5rem;
+}
+.upload-btn:hover { background: #f3f4f6; }
+.hint-text { display: block; font-size: 0.75rem; color: #9ca3af; }
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form-group.full-width { grid-column: 1 / -1; }
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #f9fafb;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  background: white;
+}
+.resume-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.btn-file-upload {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-file-upload:hover { background: #f9fafb; color: #4f46e5; border-color: #4f46e5; }
+.file-name { font-size: 0.85rem; color: #6b7280; font-weight: 500; }
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-btn:hover:not(:disabled) { background: #4338ca; }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.success-banner {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.error-banner {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}

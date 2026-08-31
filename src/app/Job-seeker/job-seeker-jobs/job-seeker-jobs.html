@@ -1,0 +1,57 @@
+<div class="dashboard-container">
+  <main class="content-body">
+    <span class="subtitle">JOB SEEKER DASHBOARD</span>
+    <h1 class="page-title">My Job Applications</h1>
+    <p class="description">Track the status of every job you've applied to, all in one place.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num blue">{{ appliedCount() }}</span>
+        <span class="stat-label">Applied</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num orange">{{ underReviewCount() }}</span>
+        <span class="stat-label">Under Review</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num cyan">{{ interviewCount() }}</span>
+        <span class="stat-label">Interview</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num green">{{ offerCount() }}</span>
+        <span class="stat-label">Offer</span>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <button [class.active]="selectedFilter() === 'All'" (click)="setFilter('All')">All</button>
+      <button [class.active]="selectedFilter() === 'Applied'" (click)="setFilter('Applied')">Applied</button>
+      <button [class.active]="selectedFilter() === 'Under Review'" (click)="setFilter('Under Review')">Under Review</button>
+      <button [class.active]="selectedFilter() === 'Interview'" (click)="setFilter('Interview')">Interview</button>
+      <button [class.active]="selectedFilter() === 'Offer'" (click)="setFilter('Offer')">Offer</button>
+      <button [class.active]="selectedFilter() === 'Rejected'" (click)="setFilter('Rejected')">Rejected</button>
+    </div>
+
+    <div class="applications-list">
+      @for (app of filteredApplications(); track app.id) {
+        <div class="app-card">
+          <div class="card-left">
+            <div class="avatar" [style.background-color]="app.avatarBg">{{ app.avatarText }}</div>
+            <div class="job-details">
+              <h3>{{ app.title }}</h3>
+              <p class="company">{{ app.company }}</p>
+              <div class="meta-info">
+                <span>📍 {{ app.location }}</span>
+                <span>Applied on {{ app.appliedDate }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="status-badge" [ngClass]="getStatusClass(app.status)">{{ app.status }}</span>
+            <a href="#" class="view-link">View details →</a>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
