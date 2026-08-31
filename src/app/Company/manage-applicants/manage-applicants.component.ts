@@ -1,80 +1,156 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-interface Applicant {
-  id: number;
-  name: string;
-  initials: string;
-  roleApplied: string;
-  appliedDate: string;
-  email: string;
-  phone: string;
-  experience: string;
-  education: string;
-  status: string;
-  coverLetter: string;
-}
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-applicants',
   standalone: true,
-  imports: [CommonModule],
-  // Updated to the standard CLI template name
-  templateUrl: './manage-applicants.component.html' 
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: './manage-applicants.component.html',
+  styleUrl: './manage-applicants.component.css'
 })
 export class ManageApplicantsComponent implements OnInit {
+  private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
   
-  applicants: Applicant[] = [
-    {
-      id: 1,
-      name: 'Kasun Perera',
-      initials: 'KP',
-      roleApplied: 'Senior Software Engineer',
-      appliedDate: '2 hours ago',
-      email: 'kasun.p@email.com',
-      phone: '+94 77 123 4567',
-      experience: '5 Years - Full Stack',
-      education: 'BSc Computer Science, NSBM Green University',
-      status: 'New',
-      coverLetter: 'I am a highly motivated software engineer with 5 years of experience building scalable web applications. I am very interested in bringing my skills to your engineering team.'
-    },
-    {
-      id: 2,
-      name: 'Amandi Silva',
-      initials: 'AS',
-      roleApplied: 'Product Designer',
-      appliedDate: '1 day ago',
-      email: 'amandi.design@email.com',
-      phone: '+94 71 987 6543',
-      experience: '3 Years - UI/UX',
-      education: 'BA Graphic Design',
-      status: 'Reviewed',
-      coverLetter: 'Attached is my portfolio showcasing my previous work in SaaS product design. I specialize in creating intuitive user experiences and would love to discuss this role further.'
-    },
-    {
-      id: 3,
-      name: 'Dinuka Rajapakse',
-      initials: 'DR',
-      roleApplied: 'Senior Software Engineer',
-      appliedDate: '2 days ago',
-      email: 'dinuka.dev@email.com',
-      phone: '+94 70 555 1234',
-      experience: '4 Years - Backend',
-      education: 'BSc IT',
-      status: 'New',
-      coverLetter: 'With a strong background in backend systems and database architecture, I am confident I can contribute immediately to your ongoing projects.'
-    }
-  ];
+  companyName = 'Technova Solutions';
+  applicants: any[] = [];
+  selectedApplicant: any = null;
+  isLoading = false;
 
-  selectedApplicant: Applicant | null = null;
+  decisionNote = '';
+  isEditingDecision = false;
+  statusSuccessMessage = '';
 
-  ngOnInit() {
-    if (this.applicants.length > 0) {
-      this.selectedApplicant = this.applicants[0];
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const stored = localStorage.getItem('companyName');
+      if (stored) {
+        this.companyName = stored;
+      }
+      this.fetchApplicants();
+    } else {
+      this.isLoading = false;
     }
   }
 
-  selectApplicant(applicant: Applicant) {
+  fetchApplicants(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.isLoading = false;
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    const companyParam = encodeURIComponent((this.companyName || '').trim());
+    this.http.get<any>(`http://localhost:3000/api/applications/employer-applicants?company=${companyParam}`).subscribe({
+      next: (response) => {
+        if (response && response.success && Array.isArray(response.applicants)) {
+          this.applicants = response.applicants.map((app: any) => ({
+            id: app.id,
+            name: app.seekerName || `Candidate ${app.id}`, 
+            initials: app.seekerName ? app.seekerName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'TS',
+            roleApplied: app.jobTitle,
+            appliedDate: app.appliedDate,
+            status: app.status || 'New',
+            employerFeedback: app.employerFeedback || '',
+            email: app.seekerEmail,
+            phone: app.phone || '+94 77 123 4567',
+            location: app.location || 'Sri Lanka',
+            experience: app.experience || 'Industry experience in modern software development.',
+            education: app.education || 'BSc in Computer Science',
+            coverLetter: app.coverLetter || `Dear Hiring Team,\n\nI am pleased to submit my application for the ${app.jobTitle} position at ${this.companyName}.\n\nThank you,\n${app.seekerName}`,
+            resumeFileName: app.resumeFileName || 'Candidate_Resume.pdf',
+            resumeData: app.resumeData || ''
+          }));
+
+          if (this.applicants.length > 0) {
+            this.selectApplicant(this.applicants[0]);
+          }
+        }
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching applicants:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  selectApplicant(applicant: any): void {
     this.selectedApplicant = applicant;
+    this.decisionNote = applicant?.employerFeedback || '';
+    this.isEditingDecision = false;
+    this.statusSuccessMessage = '';
+  }
+
+  toggleEditDecision(): void {
+    this.isEditingDecision = !this.isEditingDecision;
+    this.cdr.detectChanges();
+  }
+
+  updateStatus(newStatus: string): void {
+    if (!this.selectedApplicant) return;
+
+    const appId = this.selectedApplicant.id;
+    const payload = {
+      status: newStatus,
+      employerFeedback: (this.decisionNote || '').trim()
+    };
+    
+    this.http.put<any>(`http://localhost:3000/api/applications/update-status/${appId}`, payload).subscribe({
+      next: (response) => {
+        if (response && response.success) {
+          this.selectedApplicant.status = newStatus;
+          this.selectedApplicant.employerFeedback = (this.decisionNote || '').trim();
+          const index = this.applicants.findIndex(a => a.id === appId);
+          if (index !== -1) {
+            this.applicants[index].status = newStatus;
+            this.applicants[index].employerFeedback = (this.decisionNote || '').trim();
+          }
+          this.isEditingDecision = false;
+          this.statusSuccessMessage = `Decision (${newStatus}) sent to candidate!`;
+          setTimeout(() => {
+            this.statusSuccessMessage = '';
+            this.cdr.detectChanges();
+          }, 4000);
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Error updating status:', err);
+        alert('Failed to update candidate status.');
+      }
+    });
+  }
+
+  downloadResume(applicant: any): void {
+    if (!applicant || !isPlatformBrowser(this.platformId)) return;
+
+    if (applicant.resumeData && applicant.resumeData.startsWith('data:')) {
+      const link = document.createElement('a');
+      link.href = applicant.resumeData;
+      link.download = applicant.resumeFileName || `${applicant.name.replace(/\s+/g, '_')}_Resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      const content = `CANDIDATE APPLICATION PROFILE\n----------------------------\nName: ${applicant.name}\nEmail: ${applicant.email}\nPhone: ${applicant.phone}\nRole Applied: ${applicant.roleApplied}\nCompany: ${this.companyName}\nApplied Date: ${applicant.appliedDate}\nStatus: ${applicant.status}\n\nEXPERIENCE:\n${applicant.experience}\n\nEDUCATION:\n${applicant.education}\n\nCOVER LETTER:\n${applicant.coverLetter}\n`;
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${applicant.name.replace(/\s+/g, '_')}_Profile.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
   }
 }
