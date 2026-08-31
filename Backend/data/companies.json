@@ -1,0 +1,30 @@
+{
+  "companies": [
+    {
+      "id": 1,
+      "companyName": "Technova Solutions",
+      "email": "contact@technovasolutions.lk",
+      "password": "companysecure123",
+      "website": "https://technovasolutions.lk",
+      "location": "Anuradhapura, Sri Lanka",
+      "industry": "Information Technology",
+      "description": "We specialize in custom web and mobile software development services, bringing innovative ideas to life."
+    },
+    {
+      "id": 1788067919937,
+      "companyName": "Innodata Lanka",
+      "email": "slt@admin.com",
+      "password": "12345678",
+      "website": "",
+      "location": "",
+      "industry": "Information Technology",
+      "description": ""
+    }
+  ],
+  "settings": {
+    "emailNotifications": true,
+    "twoFactorAuth": false,
+    "privacyMode": "Public",
+    "theme": "Light"
+  }
+}
