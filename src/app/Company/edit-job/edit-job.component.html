@@ -72,7 +72,7 @@
 
       <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-4 mt-8">
         <a routerLink="/company/settings" class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">Cancel</a>
-        <button type="submit" class="bg-[#5046e5] text-white font-medium px-8 py-3 rounded-xl hover:bg-[#4338ca] transition-colors shadow-sm">Save Changes</button>
+        <button type="submit" [disabled]="isLoading" class="bg-[#5046e5] text-white font-medium px-8 py-3 rounded-xl hover:bg-[#4338ca] transition-colors shadow-sm disabled:opacity-60">{{ isLoading ? 'Saving...' : 'Save Changes' }}</button>
       </div>
 
       @if (message) {
