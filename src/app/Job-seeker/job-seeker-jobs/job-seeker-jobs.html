@@ -1,0 +1,157 @@
+<div class="dashboard-container">
+  <main class="content-body">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem;">
+      <div>
+        <span class="subtitle">JOB SEEKER DASHBOARD</span>
+        <h1 class="page-title">My Job Applications</h1>
+        <p class="description">Track the status of every job you've applied to, all in one place.</p>
+      </div>
+      <a routerLink="/" style="font-size: 0.875rem; font-weight: 600; color: #2563eb; text-decoration: none; background: #eff6ff; border: 1px solid #dbeafe; padding: 8px 16px; border-radius: 8px; white-space: nowrap;">← Back to Home</a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num blue">{{ appliedCount() }}</span>
+        <span class="stat-label">Applied</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num orange">{{ underReviewCount() }}</span>
+        <span class="stat-label">Under Review</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num cyan">{{ interviewCount() }}</span>
+        <span class="stat-label">Interview</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num green">{{ offerCount() }}</span>
+        <span class="stat-label">Offer</span>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <button [class.active]="selectedFilter() === 'All'" (click)="setFilter('All')">All</button>
+      <button [class.active]="selectedFilter() === 'Applied'" (click)="setFilter('Applied')">Applied</button>
+      <button [class.active]="selectedFilter() === 'Under Review'" (click)="setFilter('Under Review')">Under Review</button>
+      <button [class.active]="selectedFilter() === 'Interview'" (click)="setFilter('Interview')">Interview</button>
+      <button [class.active]="selectedFilter() === 'Offer'" (click)="setFilter('Offer')">Offer</button>
+      <button [class.active]="selectedFilter() === 'Rejected'" (click)="setFilter('Rejected')">Rejected</button>
+    </div>
+
+    <div class="applications-list">
+      @if (isLoading) {
+        <div style="padding: 3rem 1rem; text-align: center; color: #2563eb; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <p style="font-weight: 700; font-size: 0.95rem; letter-spacing: 1.5px; text-transform: uppercase; margin: 0; color: #2563eb;">LOADING APPLICATIONS....</p>
+        </div>
+      } @else if (filteredApplications().length === 0) {
+        <div style="padding: 3rem 1rem; text-align: center; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0 0 4px;">No Applications</h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin: 0;">No job applications found matching the selected filter.</p>
+        </div>
+      } @else {
+        @for (app of filteredApplications(); track app.id) {
+          <div class="app-card">
+            <div class="card-left">
+              <div class="avatar" [style.background-color]="app.avatarBg || '#e0e7ff'" [style.color]="'#4338ca'">{{ app.avatarText || (app.company ? app.company.charAt(0) : 'J') }}</div>
+              <div class="job-details">
+                <h3>{{ app.jobTitle || app.title }}</h3>
+                <p class="company">{{ app.company }}</p>
+                <div class="meta-info">
+                  <span>📍 {{ app.location }}</span>
+                  <span>Applied on {{ app.appliedDate }}</span>
+                </div>
+
+                <!-- Employer Feedback / Reason Preview -->
+                <div *ngIf="app.employerFeedback" style="margin-top: 0.6rem; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.4;"
+                     [ngStyle]="{
+                       'background': (app.status === 'Accepted' || app.status === 'Offer') ? '#f0fdf4' : ((app.status === 'Interview') ? '#eef2ff' : '#fef2f2'),
+                       'color': (app.status === 'Accepted' || app.status === 'Offer') ? '#166534' : ((app.status === 'Interview') ? '#3730a3' : '#991b1b'),
+                       'border': (app.status === 'Accepted' || app.status === 'Offer') ? '1px solid #bbf7d0' : ((app.status === 'Interview') ? '1px solid #c7d2fe' : '1px solid #fecaca')
+                     }">
+                  <span style="font-weight: 700;">
+                    {{ (app.status === 'Accepted' || app.status === 'Offer') ? '🎉 Offer Note:' : ((app.status === 'Interview') ? '📅 Interview Note:' : 'Reason / Note:') }}
+                  </span>
+                  {{ app.employerFeedback }}
+                </div>
+              </div>
+            </div>
+            <div class="card-right">
+              <span class="status-badge" [ngClass]="getStatusClass(app.status)">{{ app.status }}</span>
+              <button type="button" class="view-link" (click)="openDetailsModal(app)" style="background: none; border: none; cursor: pointer; text-align: right; font-weight: 600; color: #2563eb; padding: 0;">
+                View details →
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </main>
+
+  <!-- APPLICATION DETAILS MODAL -->
+  <div *ngIf="selectedAppForModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
+    <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+      
+      <!-- Modal Header -->
+      <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: #fafafa;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px;">Application Details</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 4px 0 2px;">{{ selectedAppForModal.jobTitle || selectedAppForModal.title }}</h2>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0;">{{ selectedAppForModal.company }} • Applied on {{ selectedAppForModal.appliedDate }}</p>
+        </div>
+        <button (click)="closeDetailsModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; color: #475569;">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.15rem;">
+        
+        <!-- Status Banner -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Status:</span>
+          <span class="status-badge" [ngClass]="getStatusClass(selectedAppForModal.status)">{{ selectedAppForModal.status }}</span>
+        </div>
+
+        <!-- Employer Note / Offer Details / Reason Section -->
+        <div style="padding: 1.25rem; border-radius: 14px; border: 1px solid;"
+             [ngStyle]="{
+               'background': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#f0fdf4' : ((selectedAppForModal.status === 'Interview') ? '#eef2ff' : ((selectedAppForModal.status === 'Rejected') ? '#fef2f2' : '#f8fafc')),
+               'border-color': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#bbf7d0' : ((selectedAppForModal.status === 'Interview') ? '#c7d2fe' : ((selectedAppForModal.status === 'Rejected') ? '#fecaca' : '#e2e8f0'))
+             }">
+          <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;"
+               [ngStyle]="{
+                 'color': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#166534' : ((selectedAppForModal.status === 'Interview') ? '#3730a3' : ((selectedAppForModal.status === 'Rejected') ? '#991b1b' : '#334155'))
+               }">
+            {{ (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '🎉 Official Offer Details / Acceptance Message' : ((selectedAppForModal.status === 'Interview') ? '📅 Interview Invitation & Details' : ((selectedAppForModal.status === 'Rejected') ? '❌ Application Decision / Feedback Reason' : 'ℹ️ Employer Status Note')) }}
+          </div>
+          <p style="font-size: 0.92rem; line-height: 1.5; margin: 0; color: #1e293b; white-space: pre-wrap;">
+            {{ selectedAppForModal.employerFeedback || 'No specific employer note has been added yet. Your application is currently ' + selectedAppForModal.status + '.' }}
+          </p>
+        </div>
+
+        <!-- Application Meta Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #fafafa; padding: 1rem; border-radius: 12px; border: 1px solid #f1f5f9;">
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Location</span>
+            <p style="font-size: 0.85rem; font-weight: 600; color: #0f172a; margin: 2px 0 0;">{{ selectedAppForModal.location || 'Colombo, Sri Lanka' }}</p>
+          </div>
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Contact Phone</span>
+            <p style="font-size: 0.85rem; font-weight: 600; color: #0f172a; margin: 2px 0 0;">{{ selectedAppForModal.phone || '+94 77 123 4567' }}</p>
+          </div>
+        </div>
+
+        <!-- Cover Letter -->
+        <div *ngIf="selectedAppForModal.coverLetter">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Cover Letter Submitted</span>
+          <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.85rem; color: #334155; line-height: 1.5; white-space: pre-wrap;">{{ selectedAppForModal.coverLetter }}</div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; background: #fafafa;">
+        <button (click)="closeDetailsModal()" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 0.88rem; padding: 0.55rem 1.5rem; border-radius: 10px; cursor: pointer;">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
