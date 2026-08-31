@@ -29,6 +29,10 @@
 .btn--ghost-dark { background: transparent; color: #cbd3ea; }
 .btn--outline-light { background: transparent; border: 1px solid #465080; color: #fff; }
 .btn--accent { background: var(--orange); color: #1a1f2e; }
+.btn--amber { background: #f59e0b; color: #0f172a; font-weight: 700; border: none; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); transition: all 0.2s ease; }
+.btn--amber:hover { background: #d97706; color: #fff; transform: translateY(-1px); }
+.btn--white { background: #ffffff; color: #1e3a8a; font-weight: 700; border: 1px solid #ffffff; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); transition: all 0.2s ease; }
+.btn--white:hover { background: #f1f5f9; color: #1d4ed8; transform: translateY(-1px); }
 
 /* HERO */
 .hero { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-accent) 100%); padding: 64px 24px 56px; }
@@ -50,10 +54,13 @@
 /* CONTENT LAYOUT */
 .content { padding: 40px 24px 80px; }
 .content__inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; }
+.content__inner--no-filters { grid-template-columns: 1fr; max-width: 1000px; }
 
 /* FILTERS */
 .filters { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
 .filters__title { margin: 0 0 16px; font-size: 1rem; }
+.filter-reset-btn { background: #f1f5f9; border: 1px solid var(--border); color: #475569; font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 6px; cursor: pointer; text-decoration: none; transition: all 0.15s ease; }
+.filter-reset-btn:hover { background: #e2e8f0; color: #0f172a; }
 .filter-group { margin-bottom: 22px; }
 .filter-group__label { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; }
 .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 5px 0; cursor: pointer; }
@@ -62,10 +69,12 @@
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
 .select-input, .range-input { width: 100%; }
+.range-input { accent-color: var(--blue-accent); cursor: pointer; }
 .select-input { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
 
 .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.pill { border: 1px solid var(--border); background: #fff; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; }
+.pill { border: 1px solid var(--border); background: #fff; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 140ms ease, border-color 140ms ease; }
+.pill:active { transform: scale(0.95); }
 .pill--active { background: var(--blue-accent); border-color: var(--blue-accent); color: #fff; }
 .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 
@@ -77,7 +86,12 @@
 .sort-by { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); }
 .sort-by select { border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; }
 
-.job-card { background: #fff; border: 1px solid var(--border); border-left: 4px solid transparent; border-radius: 10px; padding: 18px; display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.job-card { background: #fff; border: 1px solid var(--border); border-left: 4px solid transparent; border-radius: 10px; padding: 18px; display: flex; align-items: center; gap: 16px; margin-bottom: 14px; transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1), border-color 150ms ease; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover { border-color: #94a3b8; }
+  .job-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08); border-color: #cbd5e1; }
+}
 .job-card__avatar { width: 44px; height: 44px; border-radius: 10px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
 .job-card__body { flex: 1; }
 .job-card__title { margin: 0 0 2px; font-size: 1rem; }
@@ -102,4 +116,8 @@
   .hero__stats { flex-wrap: wrap; gap: 24px; }
   .search-bar { flex-direction: column; align-items: stretch; }
   .search-bar__divider { display: none; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
