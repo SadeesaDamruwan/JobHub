@@ -168,6 +168,3 @@ Example body for **Update applicant status**:
 Once your requests are set up, go to your collection's **⋯ menu → Export**, save it as `Job_Hub.postman_collection.json`, and commit it into the repo (e.g. under a `/postman` folder) so it's part of your Assignment 03 submission alongside the screenshots.
 
 ---
-
-## License
-See [LICENSE](./LICENSE).
