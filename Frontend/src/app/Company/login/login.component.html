@@ -1,0 +1,84 @@
+<div class="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 flex justify-center items-center font-sans">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
+    
+    <!-- STATE 1: FORGOT PASSWORD FORM -->
+    <div *ngIf="isForgotPassword">
+      <p class="text-xs font-bold tracking-widest text-[#5046e5] uppercase mb-2">EMPLOYER PASSWORD RESET</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">Reset your<br>Company Password</h1>
+      <p class="text-gray-500 text-sm mb-6">Enter your registered company email address and set your new password.</p>
+
+      <form class="space-y-4" (ngSubmit)="submitResetPassword()">
+        <div>
+          <label class="block text-sm font-semibold text-gray-900 mb-2">Company email address</label>
+          <input type="email" name="resetEmail" placeholder="company@email.com" [(ngModel)]="resetEmail" required class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#5046e5] focus:bg-white transition-all">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-900 mb-2">New password</label>
+          <input type="password" name="newPassword" placeholder="At least 6 characters" [(ngModel)]="newPassword" required class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#5046e5] focus:bg-white transition-all">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-900 mb-2">Confirm new password</label>
+          <input type="password" name="confirmPassword" placeholder="Confirm your new password" [(ngModel)]="confirmPassword" required class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#5046e5] focus:bg-white transition-all">
+        </div>
+
+        @if (resetMessage) {
+          <p [class]="resetSuccess ? 'text-sm font-medium text-center p-3 rounded-lg bg-green-50 text-green-700' : 'text-sm font-medium text-center p-3 rounded-lg bg-red-50 text-red-700'">
+            {{ resetMessage }}
+          </p>
+        }
+
+        <button type="submit" [disabled]="isResetLoading" class="w-full bg-[#5046e5] text-white font-medium py-3.5 rounded-xl hover:bg-[#4338ca] transition-colors mt-4 shadow-sm cursor-pointer">
+          {{ isResetLoading ? 'Updating password...' : 'Set New Password' }}
+        </button>
+
+        <p class="text-center text-sm text-gray-600 mt-6">
+          Remember your password? 
+          <a href="javascript:void(0)" (click)="toggleForgotPassword(false)" class="font-medium text-[#5046e5] hover:underline cursor-pointer">Back to Log in</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- STATE 2: REGULAR LOGIN FORM -->
+    <div *ngIf="!isForgotPassword">
+      <p class="text-xs font-bold tracking-widest text-[#5046e5] uppercase mb-2">COMPANY LOGIN</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">Welcome back to<br>JobHub.lk</h1>
+      <p class="text-gray-500 text-sm mb-8">Log in to your employer profile to post jobs, manage applicants, and hire top talent.</p>
+
+      <form class="space-y-5" (ngSubmit)="login()">
+        <div>
+          <label for="email" class="block text-sm font-semibold text-gray-900 mb-2">Company email address</label>
+          <input type="email" id="email" name="email" placeholder="company@email.com" [(ngModel)]="email" required class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#5046e5] focus:bg-white transition-all">
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password</label>
+          <div class="relative">
+            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" placeholder="Enter your password" [(ngModel)]="password" class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#5046e5] focus:bg-white transition-all pr-16">
+            <button type="button" class="absolute inset-y-0 right-0 px-4 text-sm font-medium text-gray-500 hover:text-[#5046e5] transition-colors" (click)="togglePassword()">{{ showPassword ? 'Hide' : 'Show' }}</button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-6">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe" class="w-4 h-4 text-[#5046e5] border-gray-300 rounded focus:ring-[#5046e5]">
+            <span class="ml-2 text-sm text-gray-600">Remember me</span>
+          </label>
+          <a href="javascript:void(0)" (click)="toggleForgotPassword(true)" class="text-sm font-medium text-[#5046e5] hover:underline cursor-pointer">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="w-full bg-[#5046e5] text-white font-medium py-3.5 rounded-xl hover:bg-[#4338ca] transition-colors mt-6 shadow-sm cursor-pointer">Log in</button>
+
+        @if (message) {
+          <p [class]="success ? 'text-sm font-medium text-center p-3 rounded-lg mt-4 bg-green-50 text-green-700' : 'text-sm font-medium text-center p-3 rounded-lg mt-4 bg-red-50 text-red-700'">{{ message }}</p>
+        }
+      </form>
+
+      <p class="text-center text-sm text-gray-600 mt-8">
+        New to JobHub? <a routerLink="/company/register" class="font-medium text-[#5046e5] hover:underline">Create an account</a>
+      </p>
+    </div>
+
+  </div>
+</div>

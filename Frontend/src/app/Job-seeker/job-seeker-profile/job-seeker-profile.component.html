@@ -1,0 +1,109 @@
+<div class="page-wrapper">
+  <main class="main-content">
+
+    <!-- LOADING STATE -->
+    @if (isLoading) {
+    <div class="state-container">
+      <p>Loading your profile...</p>
+    </div>
+    }
+
+    <!-- ERROR STATE -->
+    @else if (errorMessage) {
+    <div class="state-container error-state">
+      <h2>Profile Incomplete</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="submit-btn" (click)="goToEditProfile()">Complete Profile Now</button>
+    </div>
+    }
+
+    <!-- SUCCESS VIEW -->
+    @else if (profileData) {
+    <div class="profile-card">
+
+      <!-- Top Navigation Bar -->
+      <div class="profile-top-bar">
+        <a routerLink="/" class="btn-back-home">← Back to Home</a>
+        <button class="btn-edit" (click)="goToEditProfile()">✏️ Edit Profile</button>
+      </div>
+
+      <!-- Centered Header -->
+      <div class="profile-header">
+        <div class="avatar-display overflow-hidden flex items-center justify-center">
+          @if (profileData.avatar) {
+            <img [src]="profileData.avatar" alt="Avatar" class="w-full h-full object-cover rounded-full">
+          } @else {
+            {{ (profileData.fullName?.charAt(0) || 'U') | uppercase }}
+          }
+        </div>
+        <h2 class="profile-name">{{ profileData.fullName || 'Job Seeker' }}</h2>
+        <p class="profile-title">{{ profileData.jobTitle || 'Job Seeker' }}</p>
+        <p class="profile-location">📍 {{ profileData.location || 'Location not specified' }}</p>
+      </div>
+
+      <!-- Body Grid -->
+      <div class="info-grid">
+
+        <!-- Left Column -->
+        <div class="main-column">
+          <div class="info-section">
+            <h3>Professional Summary</h3>
+            <p class="info-text">{{ profileData.bio || 'No summary provided yet.' }}</p>
+          </div>
+
+          <div class="info-section">
+            <h3>Key Skills</h3>
+            <div class="skills-container">
+              @if (skillsArray.length > 0) {
+              @for (skill of skillsArray; track skill) {
+              <span class="skill-bubble">{{ skill }}</span>
+              }
+              } @else {
+              <p class="info-text">No skills added yet.</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="side-column">
+
+          <!-- Resume / CV Card -->
+          <div class="resume-card">
+            <h3>Resume / CV</h3>
+            <div class="resume-info">
+              <span class="resume-icon">📄</span>
+              <span class="resume-name">{{ resumeFileName || 'Profile_Resume.pdf' }}</span>
+            </div>
+            <button (click)="downloadCV()" class="btn-download-cv">
+              ⬇️ Download CV
+            </button>
+          </div>
+
+          <div class="contact-box mt-6">
+            <h3>Contact Details</h3>
+
+            <div class="contact-item">
+              <span class="contact-icon">📧</span>
+              <div class="contact-text">
+                <span class="contact-label">Email Address</span>
+                <span class="contact-value">{{ profileData.email }}</span>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <span class="contact-icon">📱</span>
+              <div class="contact-text">
+                <span class="contact-label">Phone Number</span>
+                <span class="contact-value">{{ profileData.phone || 'Not provided' }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    }
+  </main>
+</div>

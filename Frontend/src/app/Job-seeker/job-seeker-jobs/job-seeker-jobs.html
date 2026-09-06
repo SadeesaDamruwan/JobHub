@@ -1,0 +1,319 @@
+<div class="dashboard-container">
+  <main class="content-body">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
+      <div>
+        <span class="subtitle">JOB SEEKER DASHBOARD</span>
+        <h1 class="page-title">{{ activeMainTab === 'applications' ? 'My Job Applications' : 'Saved Job Posts' }}</h1>
+        <p class="description">{{ activeMainTab === 'applications' ? 'Track the status of every job you\'ve applied to, all in one place.' : 'Review and easily apply to job vacancies you have bookmarked for later.' }}</p>
+      </div>
+      <a routerLink="/" style="font-size: 0.875rem; font-weight: 600; color: #2563eb; text-decoration: none; background: #eff6ff; border: 1px solid #dbeafe; padding: 8px 16px; border-radius: 8px; white-space: nowrap; transition: all 0.2s;">← Back to Job Feed</a>
+    </div>
+
+    <!-- MAIN DASHBOARD TABS -->
+    <div class="main-tabs-bar" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">
+      <button type="button" (click)="setMainTab('applications')"
+        [style.background]="activeMainTab === 'applications' ? '#2563eb' : '#f1f5f9'"
+        [style.color]="activeMainTab === 'applications' ? '#ffffff' : '#475569'"
+        [style.borderColor]="activeMainTab === 'applications' ? '#2563eb' : '#cbd5e1'"
+        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; font-size: 0.92rem; font-weight: 700; border-radius: 10px; border: 1px solid; cursor: pointer; transition: all 0.2s;">
+        <span>📋</span>
+        <span>My Applications</span>
+        <span style="padding: 2px 7px; border-radius: 12px; font-size: 0.75rem; font-weight: 800;"
+          [style.background]="activeMainTab === 'applications' ? '#1d4ed8' : '#e2e8f0'"
+          [style.color]="activeMainTab === 'applications' ? '#ffffff' : '#475569'">
+          {{ applications.length }}
+        </span>
+      </button>
+
+      <button type="button" (click)="setMainTab('saved-jobs')"
+        [style.background]="activeMainTab === 'saved-jobs' ? '#e11d48' : '#f1f5f9'"
+        [style.color]="activeMainTab === 'saved-jobs' ? '#ffffff' : '#475569'"
+        [style.borderColor]="activeMainTab === 'saved-jobs' ? '#e11d48' : '#cbd5e1'"
+        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; font-size: 0.92rem; font-weight: 700; border-radius: 10px; border: 1px solid; cursor: pointer; transition: all 0.2s;">
+        <span>🔖</span>
+        <span>Saved Posts</span>
+        <span style="padding: 2px 7px; border-radius: 12px; font-size: 0.75rem; font-weight: 800;"
+          [style.background]="activeMainTab === 'saved-jobs' ? '#be123c' : '#e2e8f0'"
+          [style.color]="activeMainTab === 'saved-jobs' ? '#ffffff' : '#475569'">
+          {{ savedJobs.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- TAB 1: APPLICATIONS -->
+    <div *ngIf="activeMainTab === 'applications'">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num blue">{{ appliedCount() }}</span>
+          <span class="stat-label">Applied</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num orange">{{ underReviewCount() }}</span>
+          <span class="stat-label">Under Review</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num cyan">{{ interviewCount() }}</span>
+          <span class="stat-label">Interview</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num green">{{ offerCount() }}</span>
+          <span class="stat-label">Offer</span>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button [class.active]="selectedFilter() === 'All'" (click)="setFilter('All')">All</button>
+        <button [class.active]="selectedFilter() === 'Applied'" (click)="setFilter('Applied')">Applied</button>
+        <button [class.active]="selectedFilter() === 'Under Review'" (click)="setFilter('Under Review')">Under Review</button>
+        <button [class.active]="selectedFilter() === 'Interview'" (click)="setFilter('Interview')">Interview</button>
+        <button [class.active]="selectedFilter() === 'Offer'" (click)="setFilter('Offer')">Offer</button>
+        <button [class.active]="selectedFilter() === 'Rejected'" (click)="setFilter('Rejected')">Rejected</button>
+      </div>
+
+      <div class="applications-list">
+        @if (isLoading) {
+          <div style="padding: 3rem 1rem; text-align: center; color: #2563eb; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <p style="font-weight: 700; font-size: 0.95rem; letter-spacing: 1.5px; text-transform: uppercase; margin: 0; color: #2563eb;">LOADING APPLICATIONS....</p>
+          </div>
+        } @else if (filteredApplications().length === 0) {
+          <div style="padding: 3rem 1rem; text-align: center; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0 0 4px;">No Applications</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">No job applications found matching the selected filter.</p>
+          </div>
+        } @else {
+          @for (app of filteredApplications(); track app.id) {
+            <div class="app-card">
+              <div class="card-left">
+                <div class="avatar" [style.background-color]="app.avatarBg || '#e0e7ff'" [style.color]="'#4338ca'">{{ app.avatarText || (app.company ? app.company.charAt(0) : 'J') }}</div>
+                <div class="job-details">
+                  <h3>{{ app.jobTitle || app.title }}</h3>
+                  <p class="company">{{ app.company }}</p>
+                  <div class="meta-info">
+                    <span>📍 {{ app.location }}</span>
+                    <span>Applied on {{ app.appliedDate }}</span>
+                  </div>
+
+                  <!-- Employer Feedback / Reason Preview -->
+                  <div *ngIf="app.employerFeedback" style="margin-top: 0.6rem; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.8rem; line-height: 1.4;"
+                       [ngStyle]="{
+                         'background': (app.status === 'Accepted' || app.status === 'Offer') ? '#f0fdf4' : ((app.status === 'Interview') ? '#eef2ff' : '#fef2f2'),
+                         'color': (app.status === 'Accepted' || app.status === 'Offer') ? '#166534' : ((app.status === 'Interview') ? '#3730a3' : '#991b1b'),
+                         'border': (app.status === 'Accepted' || app.status === 'Offer') ? '1px solid #bbf7d0' : ((app.status === 'Interview') ? '1px solid #c7d2fe' : '1px solid #fecaca')
+                       }">
+                    <span style="font-weight: 700;">
+                      {{ (app.status === 'Accepted' || app.status === 'Offer') ? '🎉 Offer Note:' : ((app.status === 'Interview') ? '📅 Interview Note:' : 'Reason / Note:') }}
+                    </span>
+                    {{ app.employerFeedback }}
+                  </div>
+                </div>
+              </div>
+              <div class="card-right">
+                <span class="status-badge" [ngClass]="getStatusClass(app.status)">{{ app.status }}</span>
+                <button type="button" class="view-link" (click)="openDetailsModal(app)" style="background: none; border: none; cursor: pointer; text-align: right; font-weight: 600; color: #2563eb; padding: 0;">
+                  View details →
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- TAB 2: SAVED JOBS -->
+    <div *ngIf="activeMainTab === 'saved-jobs'">
+      <div class="applications-list">
+        @if (isLoadingSavedJobs) {
+          <div style="padding: 3rem 1rem; text-align: center; color: #e11d48; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <p style="font-weight: 700; font-size: 0.95rem; letter-spacing: 1.5px; text-transform: uppercase; margin: 0; color: #e11d48;">LOADING SAVED JOBS....</p>
+          </div>
+        } @else if (savedJobs.length === 0) {
+          <div style="padding: 3.5rem 1rem; text-align: center; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔖</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0 0 6px;">No Saved Posts Yet</h3>
+            <p style="font-size: 0.88rem; color: #64748b; margin: 0 0 1.25rem;">You haven't bookmarked any jobs yet. Browse all available vacancies and click the Save button to keep track of them here.</p>
+            <a routerLink="/" style="display: inline-block; background: #2563eb; color: #ffffff; padding: 8px 20px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; text-decoration: none;">
+              🌐 Browse Vacancies
+            </a>
+          </div>
+        } @else {
+          @for (job of savedJobs; track job.id) {
+            <div class="app-card" style="border-left: 4px solid #e11d48;">
+              <div class="card-left">
+                <div class="avatar" style="background-color: #fee2e2; color: #e11d48;">
+                  {{ job.company ? job.company.charAt(0).toUpperCase() : 'J' }}
+                </div>
+                <div class="job-details">
+                  <h3>{{ job.title }}</h3>
+                  <p class="company">{{ job.company }}</p>
+                  <div class="meta-info" style="flex-wrap: wrap; gap: 1rem;">
+                    <span>📍 {{ job.location }}</span>
+                    <span>👤 {{ job.type || job.workMode }}</span>
+                    <span style="font-weight: 700; color: #047857;">💰 {{ job.stipend || job.salary }}</span>
+                    <span>🕒 {{ formatPostedDate(job.postedAt) }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-right" style="gap: 0.6rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; color: #475569;">
+                    {{ job.category || 'Tech & Engineering' }}
+                  </span>
+                  <span [style.color]="getDaysLeftColor(job.deadline)" style="font-size: 0.78rem; font-weight: 700;">
+                    ⏳ {{ getDaysLeftNumber(job.deadline) }} {{ getDaysLeftLabel(job.deadline) }}
+                  </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 4px;">
+                  <button type="button" (click)="applyForSavedJob(job)"
+                    style="background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    Apply now
+                  </button>
+                  <button type="button" (click)="removeSavedJob(job)"
+                    style="background: #fff; color: #e11d48; border: 1px solid #fecdd3; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    ❤️ Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </main>
+
+  <!-- APPLICATION DETAILS MODAL -->
+  <div *ngIf="selectedAppForModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
+    <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+      
+      <!-- Modal Header -->
+      <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: #fafafa;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px;">Application Details</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 4px 0 2px;">{{ selectedAppForModal.jobTitle || selectedAppForModal.title }}</h2>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0;">{{ selectedAppForModal.company }} • Applied on {{ selectedAppForModal.appliedDate }}</p>
+        </div>
+        <button (click)="closeDetailsModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; color: #475569;">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.15rem;">
+        
+        <!-- Status Banner -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Status:</span>
+          <span class="status-badge" [ngClass]="getStatusClass(selectedAppForModal.status)">{{ selectedAppForModal.status }}</span>
+        </div>
+
+        <!-- Employer Note / Offer Details / Reason Section -->
+        <div style="padding: 1.25rem; border-radius: 14px; border: 1px solid;"
+             [ngStyle]="{
+               'background': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#f0fdf4' : ((selectedAppForModal.status === 'Interview') ? '#eef2ff' : ((selectedAppForModal.status === 'Rejected') ? '#fef2f2' : '#f8fafc')),
+               'border-color': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#bbf7d0' : ((selectedAppForModal.status === 'Interview') ? '#c7d2fe' : ((selectedAppForModal.status === 'Rejected') ? '#fecaca' : '#e2e8f0'))
+             }">
+          <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;"
+               [ngStyle]="{
+                 'color': (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '#166534' : ((selectedAppForModal.status === 'Interview') ? '#3730a3' : ((selectedAppForModal.status === 'Rejected') ? '#991b1b' : '#334155'))
+               }">
+            {{ (selectedAppForModal.status === 'Accepted' || selectedAppForModal.status === 'Offer') ? '🎉 Official Offer Details / Acceptance Message' : ((selectedAppForModal.status === 'Interview') ? '📅 Interview Invitation & Details' : ((selectedAppForModal.status === 'Rejected') ? '❌ Application Decision / Feedback Reason' : 'ℹ️ Employer Status Note')) }}
+          </div>
+          <p style="font-size: 0.92rem; line-height: 1.5; margin: 0; color: #1e293b; white-space: pre-wrap;">
+            {{ selectedAppForModal.employerFeedback || 'No specific employer note has been added yet. Your application is currently ' + selectedAppForModal.status + '.' }}
+          </p>
+        </div>
+
+        <!-- Application Meta Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #fafafa; padding: 1rem; border-radius: 12px; border: 1px solid #f1f5f9;">
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Location</span>
+            <p style="font-size: 0.85rem; font-weight: 600; color: #0f172a; margin: 2px 0 0;">{{ selectedAppForModal.location || 'Colombo, Sri Lanka' }}</p>
+          </div>
+          <div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Contact Phone</span>
+            <p style="font-size: 0.85rem; font-weight: 600; color: #0f172a; margin: 2px 0 0;">{{ selectedAppForModal.phone || '+94 77 123 4567' }}</p>
+          </div>
+        </div>
+
+        <!-- Cover Letter -->
+        <div *ngIf="selectedAppForModal.coverLetter">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Cover Letter Submitted</span>
+          <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.85rem; color: #334155; line-height: 1.5; white-space: pre-wrap;">{{ selectedAppForModal.coverLetter }}</div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; background: #fafafa;">
+        <button (click)="closeDetailsModal()" style="background: #2563eb; color: #ffffff; border: none; font-weight: 600; font-size: 0.88rem; padding: 0.55rem 1.5rem; border-radius: 10px; cursor: pointer;">Close</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- APPLICATION SUBMISSION MODAL WITH CUSTOM COVER LETTER (FOR SAVED JOBS) -->
+  <div *ngIf="isApplyModalOpen && applyingJob"
+    style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1.25rem;">
+    <div style="background: #ffffff; width: 100%; max-width: 620px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; max-height: 92vh; display: flex; flex-direction: column;">
+
+      <!-- Modal Header -->
+      <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: #fafafa;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 1px;">Submit Job Application</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 4px 0 2px;">{{ applyingJob.title }}</h2>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0;">{{ applyingJob.company }} • {{ applyingJob.location }}</p>
+        </div>
+        <button (click)="closeApplyModal()" [disabled]="isSubmittingApplication"
+          style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; color: #475569;">✕</button>
+      </div>
+
+      <!-- Success Message Banner -->
+      <div *ngIf="applySuccessMessage" style="padding: 1.25rem 1.5rem; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.25rem;">🎉</span>
+        <span style="font-size: 0.9rem; font-weight: 700; color: #166534;">{{ applySuccessMessage }}</span>
+      </div>
+
+      <!-- Modal Body -->
+      <div *ngIf="!applySuccessMessage" style="padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem;">
+        
+        <!-- Candidate Quick Card -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <div style="font-size: 0.92rem; font-weight: 700; color: #0f172a;">{{ candidateProfile?.fullName }}</div>
+            <div style="font-size: 0.8rem; color: #64748b;">{{ candidateProfile?.email }} • {{ candidateProfile?.phone || 'No phone set' }}</div>
+          </div>
+          <div *ngIf="candidateProfile?.resumeFileName" style="display: flex; align-items: center; gap: 0.4rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; color: #1d4ed8;">
+            <span>📄</span> {{ candidateProfile.resumeFileName }}
+          </div>
+        </div>
+
+        <!-- Custom Cover Letter Area -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+            <label style="font-size: 0.85rem; font-weight: 700; color: #1e293b;">
+              Custom Cover Letter / Message to Employer
+            </label>
+            <span style="font-size: 0.75rem; color: #64748b;">Personalize your note</span>
+          </div>
+          <textarea [(ngModel)]="customCoverLetter" rows="7"
+            placeholder="Introduce yourself, explain why you're a great fit for this position, and share relevant experience..."
+            style="width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 0.85rem; font-size: 0.88rem; line-height: 1.5; color: #1e293b; font-family: inherit; resize: vertical; box-sizing: border-box; outline: none; transition: border 0.2s;"></textarea>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div *ngIf="!applySuccessMessage" style="padding: 1rem 1.5rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 0.75rem; background: #fafafa;">
+        <button type="button" (click)="closeApplyModal()" [disabled]="isSubmittingApplication"
+          style="padding: 0.6rem 1.25rem; font-size: 0.85rem; font-weight: 600; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
+          Cancel
+        </button>
+        <button type="button" (click)="submitApplication()" [disabled]="isSubmittingApplication"
+          style="padding: 0.6rem 1.5rem; font-size: 0.85rem; font-weight: 700; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <span *ngIf="isSubmittingApplication" style="display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
+          <span>{{ isSubmittingApplication ? 'Submitting...' : '🚀 Send Application' }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

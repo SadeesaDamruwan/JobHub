@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   MOTION STANDARDS (motion-skill)
+   ========================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-press: 150ms;
+  --duration-ui: 180ms;
+}
+
+/* Physical button press feedback across all interactive actions */
+button, .btn, .submit-btn, .btn-login {
+  transition: transform var(--duration-press) var(--ease-out),
+              background-color var(--duration-press) ease,
+              box-shadow var(--duration-press) ease,
+              border-color var(--duration-press) ease,
+              opacity var(--duration-press) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(:disabled),
+  .btn:hover:not(:disabled),
+  .submit-btn:hover:not(:disabled),
+  .btn-login:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+.submit-btn:active:not(:disabled),
+.btn-login:active:not(:disabled) {
+  transform: scale(0.97) translateY(0);
+}
+
+/* Smooth dropdown entry animation */
+@keyframes menuEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menu-animate-right {
+  transform-origin: top right;
+  animation: menuEnter var(--duration-ui) var(--ease-out) forwards;
+}
+
+.menu-animate-left {
+  transform-origin: top left;
+  animation: menuEnter var(--duration-ui) var(--ease-out) forwards;
+}
+
+/* Alert / banner entrance */
+@keyframes bannerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-animated {
+  animation: bannerSlideDown 200ms var(--ease-out) forwards;
+}
+
+/* Accessibility: Gated reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
