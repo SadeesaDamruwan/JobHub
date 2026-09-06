@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="1" y="14" width="47" height="72" rx="12" fill="#2563eb"/>
+  <text x="24.5" y="52" font-family="Arial, sans-serif" font-size="50" font-weight="900" fill="#ffffff" dominant-baseline="central" text-anchor="middle">J</text>
+  <rect x="52" y="14" width="47" height="72" rx="12" fill="#f59e0b"/>
+  <text x="75.5" y="52" font-family="Arial, sans-serif" font-size="50" font-weight="900" fill="#000000" dominant-baseline="central" text-anchor="middle">H</text>
+</svg>

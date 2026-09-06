@@ -1,0 +1,18 @@
+{
+  "routes": {
+    "/": {},
+    "/company/applicants": {},
+    "/company/edit-job": {},
+    "/company/login": {},
+    "/company/post-job": {},
+    "/company/profile": {},
+    "/company/register": {},
+    "/company/settings": {},
+    "/job-seeker/complete-profile": {},
+    "/job-seeker/jobs": {},
+    "/job-seeker/login": {},
+    "/job-seeker/profile": {},
+    "/job-seeker/register": {},
+    "/job-seeker/saved-jobs": {}
+  }
+}
